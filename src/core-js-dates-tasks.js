@@ -299,8 +299,38 @@ function getQuarter(date) {
  * { start: '01-01-2024', end: '15-01-2024' }, 1, 3 => ['01-01-2024', '05-01-2024', '09-01-2024', '13-01-2024']
  * { start: '01-01-2024', end: '10-01-2024' }, 1, 1 => ['01-01-2024', '03-01-2024', '05-01-2024', '07-01-2024', '09-01-2024']
  */
-function getWorkSchedule(/* period, countWorkDays, countOffDays */) {
-  throw new Error('Not implemented');
+function getWorkSchedule(period, countWorkDays, countOffDays) {
+  const [dayE, monthE, yearE] = period.end.split('-');
+  const endDate = new Date(yearE, monthE - 1, dayE);
+
+  const [dayS, monthS, yearS] = period.start.split('-');
+  const startDate = new Date(yearS, monthS - 1, dayS);
+
+  const result = [];
+  const dayDuration = 24 * 3600 * 1000;
+
+  let totalDays = (endDate.getTime() - startDate.getTime()) / dayDuration;
+  if (new Date(yearE, 2, 0).getDate() === 29) {
+    totalDays += 1;
+  }
+  let day = +dayS;
+
+  while (day <= totalDays) {
+    for (let i = 0; i < countWorkDays; i += 1) {
+      const newDate = new Date(yearS, monthS - 1, day);
+      if (newDate.getTime() > endDate.getTime()) return result;
+
+      const formatDay = newDate.getDate().toString().padStart(2, '0');
+      const formatMonth = (newDate.getMonth() + 1).toString().padStart(2, '0');
+      const formNewDate = `${formatDay}-${formatMonth}-${yearS}`;
+      result.push(formNewDate);
+      day += 1;
+    }
+
+    day += countOffDays;
+  }
+
+  return result;
 }
 
 /**
